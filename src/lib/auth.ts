@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { betterAuth } from "better-auth";
 import { emailOTP } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { sendOtpEmail } from "@/features/auth/auth-emails";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg" }),
@@ -20,13 +21,11 @@ export const auth = betterAuth({
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
         if (type === "sign-in") {
-          // Send the OTP for sign in
-        } else if (type === "email-verification") {
-          // Send the OTP for email verification
-        } else {
-          // Send the OTP for password reset
+          await sendOtpEmail(email, otp);
         }
       },
+      allowedAttempts: 5,
+      expiresIn: 600,
     }),
   ],
 });

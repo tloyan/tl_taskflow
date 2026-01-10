@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -11,23 +12,47 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { verifyOtpAction } from "../auth-actions";
+import { useActionState, useRef } from "react";
 
-export function VerifyOTPForm({ ...props }: React.ComponentProps<typeof Card>) {
+export function VerifyOTPForm({
+  email,
+  ...props
+}: React.ComponentProps<typeof Card> & { email: string }) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, pending] = useActionState(verifyOtpAction, {});
+
+  const handleComplete = () => {
+    formRef.current?.requestSubmit();
+  };
+
   return (
     <Card {...props} className="shadow-none border-none text-center">
       <CardHeader>
         <CardTitle>Check Your Email</CardTitle>
         <CardDescription className="">
-          We have sent a verification code to <strong>exa**le@gmail.com</strong>
-          . Please check your inbox and input the code below to activate your
-          account.
+          We have sent a verification code to <strong>{email}</strong>. Please
+          check your inbox and input the code below to activate your account.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form ref={formRef} action={formAction}>
+          <input type="hidden" name="email" value={email} />
+          {state.error && (
+            <p className="text-destructive text-sm">{state.error.message}</p>
+          )}
           <FieldGroup>
             <Field>
-              <InputOTP maxLength={6} id="otp" required>
+              <InputOTP
+                id="otp"
+                name="otp"
+                maxLength={6}
+                pattern={REGEXP_ONLY_DIGITS}
+                onComplete={handleComplete}
+                disabled={pending}
+                required
+              >
                 <InputOTPGroup className="mx-auto gap-2.5 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border">
                   <InputOTPSlot index={0} />
                   <InputOTPSlot index={1} />
@@ -37,6 +62,7 @@ export function VerifyOTPForm({ ...props }: React.ComponentProps<typeof Card>) {
                   <InputOTPSlot index={5} />
                 </InputOTPGroup>
               </InputOTP>
+
               <FieldDescription>
                 Enter the 6-digit code sent to your email.
               </FieldDescription>
