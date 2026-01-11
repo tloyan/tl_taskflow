@@ -3,6 +3,7 @@ import { betterAuth } from "better-auth";
 import { emailOTP } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { sendOtpEmail } from "@/features/auth/auth-emails";
+import { nextCookies } from "better-auth/next-js";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg" }),
@@ -27,5 +28,6 @@ export const auth = betterAuth({
       allowedAttempts: 5,
       expiresIn: 600,
     }),
+    nextCookies(),
   ],
 });
