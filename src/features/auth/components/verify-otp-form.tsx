@@ -13,8 +13,10 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { verifyOtpAction } from "../auth-actions";
-import { useActionState, useRef } from "react";
+import { resendOtpAction, verifyOtpAction } from "../auth-actions";
+import { useActionState, useRef, useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export function VerifyOTPForm({
   email,
@@ -22,6 +24,7 @@ export function VerifyOTPForm({
 }: React.ComponentProps<typeof Card> & { email: string }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(verifyOtpAction, {});
+  const [resendPending, resendStartTransition] = useTransition();
 
   const handleComplete = () => {
     formRef.current?.requestSubmit();
@@ -43,33 +46,52 @@ export function VerifyOTPForm({
             <p className="text-destructive text-sm">{state.error.message}</p>
           )}
           <FieldGroup>
-            <Field>
-              <InputOTP
-                id="otp"
-                name="otp"
-                maxLength={6}
-                pattern={REGEXP_ONLY_DIGITS}
-                onComplete={handleComplete}
-                disabled={pending}
-                required
-              >
-                <InputOTPGroup className="mx-auto gap-2.5 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border">
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
+            {resendPending ? (
+              <div className="flex justify-center">
+                <Spinner />
+              </div>
+            ) : (
+              <Field>
+                <InputOTP
+                  id="otp"
+                  name="otp"
+                  maxLength={6}
+                  pattern={REGEXP_ONLY_DIGITS}
+                  onComplete={handleComplete}
+                  disabled={pending}
+                  required
+                >
+                  <InputOTPGroup className="mx-auto gap-2.5 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border">
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
 
-              <FieldDescription>
-                Enter the 6-digit code sent to your email.
-              </FieldDescription>
-            </Field>
+                <FieldDescription>
+                  Enter the 6-digit code sent to your email.
+                </FieldDescription>
+              </Field>
+            )}
+
             <FieldGroup>
               <FieldDescription className="text-center">
-                Didn&apos;t receive the code? <a href="#">Resend</a>
+                Didn&apos;t receive the code?{" "}
+                <Button
+                  onClick={() =>
+                    resendStartTransition(async () => {
+                      await resendOtpAction(email);
+                    })
+                  }
+                  disabled={resendPending}
+                  variant="link"
+                  className="inline p-0 underline text-current font-normal hover:text-primary"
+                >
+                  {resendPending ? "...Sending" : "Resend"}
+                </Button>
               </FieldDescription>
             </FieldGroup>
           </FieldGroup>

@@ -35,6 +35,29 @@ export async function sendOtpAction(
   redirect(`/verify-otp?email=${encodeURIComponent(email)}`);
 }
 
+export async function resendOtpAction(email: unknown): Promise<ActionState> {
+  try {
+    await sendOtp({ email });
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      if (error instanceof AuthValidationError) {
+        return {
+          error: {
+            code: "VALIDATION_ERROR",
+            field: error.field,
+            message: error.message,
+          },
+        };
+      }
+    }
+    return {
+      error: { code: "UNKNOWN_ERROR", message: "Une erreur est survenue" },
+    };
+  }
+  return {};
+}
+
 export async function verifyOtpAction(
   _prevState: ActionState,
   formData: FormData
@@ -56,7 +79,7 @@ export async function verifyOtpAction(
           },
         };
       }
-      if (error.message.includes("invalid")) {
+      if (error.message.includes("Invalid")) {
         return {
           error: { code: "INVALID_OTP", message: "Code incorrect" },
         };
