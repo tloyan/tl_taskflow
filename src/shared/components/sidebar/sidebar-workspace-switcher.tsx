@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { Workspace, WorkspaceWithCounts } from "@/shared/mocks";
+import { WorkspaceWithCounts } from "@/shared/mocks";
 
 type SidebarWorkspaceSwitcherProps = {
   workspaces: WorkspaceWithCounts[];
@@ -109,7 +109,7 @@ export default function SidebarWorkspaceSwitcher({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-3 p-2" asChild>
-              <Link href="/dashboard">
+              <Link href="/">
                 <LayoutGridIcon className="size-4" />
                 <span className="flex-1 text-sm">All Workspaces</span>
                 {isAllWorkspacesView && (

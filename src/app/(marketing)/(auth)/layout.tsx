@@ -7,7 +7,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <div className="flex flex-col min-h-svh flex-1">
       <div className="p-6 md:p-10">
         <Button asChild>
-          <Link href="/">Back to Home</Link>
+          <Link href="/home">Back to Home</Link>
         </Button>
       </div>
 

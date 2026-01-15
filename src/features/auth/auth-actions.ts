@@ -97,5 +97,5 @@ export async function verifyOtpAction(
       error: { code: "UNKNOWN_ERROR", message: "Une erreur est survenue" },
     };
   }
-  redirect(`/dashboard`);
+  redirect(`/`);
 }
