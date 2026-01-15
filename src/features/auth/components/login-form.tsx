@@ -15,25 +15,20 @@ import { sendOtpAction } from "../auth-actions";
 import { useActionState } from "react";
 import { authClient } from "@/lib/auth-client";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+type LoginFormProps = {} & React.ComponentProps<"div">;
+
+export function LoginForm({ className, ...props }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(sendOtpAction, {});
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <form action={formAction}>
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
-            <Link
-              href="/"
-              className="flex flex-col items-center gap-2 font-medium"
-            >
-              <div className="flex size-8 items-center justify-center rounded-md">
-                <Logo />
-              </div>
-              <span className="sr-only">TaskFlow.</span>
-            </Link>
+            <div className="flex size-8 items-center justify-center rounded-md">
+              <Logo />
+            </div>
+            <span className="sr-only">TaskFlow.</span>
             <h1 className="text-xl font-bold">Welcome to TaskFlow</h1>
           </div>
           {state.error && (
@@ -62,7 +57,7 @@ export function LoginForm({
               onClick={() =>
                 authClient.signIn.social({
                   provider: "github",
-                  callbackURL: "/dashboard",
+                  callbackURL: "/",
                 })
               }
             >
@@ -77,7 +72,7 @@ export function LoginForm({
               onClick={() =>
                 authClient.signIn.social({
                   provider: "google",
-                  callbackURL: "/dashboard",
+                  callbackURL: "/",
                 })
               }
             >
