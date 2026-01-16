@@ -2,13 +2,8 @@ import "server-only";
 
 import { auth } from "@/lib/auth";
 import { loginSchema, otpSchema } from "./auth-validation";
-
-export class AuthValidationError extends Error {
-  constructor(public field: string, message: string) {
-    super(message);
-    this.name = "AuthValidationError";
-  }
-}
+import { AuthValidationError, AuthError } from "./auth-errors";
+import { headers } from "next/headers";
 
 export async function sendOtp(data: unknown) {
   const parsed = loginSchema.safeParse(data);
@@ -34,4 +29,10 @@ export async function verifyOtp(data: unknown) {
       otp: parsed.data.otp,
     },
   });
+}
+
+export async function getCurrentUser() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new AuthError();
+  return session.user;
 }

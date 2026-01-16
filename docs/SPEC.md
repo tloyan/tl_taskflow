@@ -246,6 +246,24 @@ comments
 - [ ] Highlighting des résultats
 - [ ] Recherche fuzzy (tolérance aux typos)
 
+#### Pages utilisateur
+
+- [ ] Page Account fonctionnelle (éditer profil, avatar)
+- [ ] Page Settings (préférences utilisateur, theme, langue)
+- [ ] Page Billing (si modèle payant futur)
+- [ ] Page Team (gestion équipe personnelle)
+- [ ] Upload avatar (Uploadthing/S3)
+- [ ] Sessions actives (voir/révoquer)
+- [ ] Supprimer son compte
+
+#### Améliorations UX
+
+- [ ] Dark mode toggle persisté en DB
+- [ ] Préférences utilisateur en DB
+- [ ] Raccourcis clavier globaux
+- [ ] Onboarding flow (première connexion)
+- [ ] Tour guidé des fonctionnalités
+
 #### Autres améliorations
 
 - [ ] Notifications en temps réel
