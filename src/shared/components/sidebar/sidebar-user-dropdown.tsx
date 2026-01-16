@@ -8,6 +8,7 @@ import {
   UserIcon,
   UsersIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -25,25 +26,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-// TODO: Replace with real user data from auth context
-const user = {
-  name: "John Doe",
-  role: "Admin",
-  avatarUrl: "https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-1.png",
-  initials: "JD",
-};
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { User } from "better-auth/types";
+import { useAuthContext } from "@/features/auth/auth-context";
 
 function UserInfo() {
+  const { user } = useAuthContext();
+
+  const image =
+    user.image || "https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-1.png";
+  const name = user.name || user.email.split("@")[0];
+  const role = "User";
+
   return (
     <>
       <Avatar className="size-8 rounded-lg">
-        <AvatarImage src={user.avatarUrl} alt={user.name} />
-        <AvatarFallback className="rounded-lg">{user.initials}</AvatarFallback>
+        <AvatarImage src={image} alt={name} />
+        <AvatarFallback>
+          <UserIcon className="size-4" />
+        </AvatarFallback>
       </Avatar>
       <div className="grid flex-1 text-left text-sm leading-tight">
-        <span className="truncate font-medium">{user.name}</span>
-        <span className="truncate text-xs">{user.role}</span>
+        <span className="truncate font-medium">{name}</span>
+        <span className="truncate text-xs">{role}</span>
       </div>
     </>
   );
@@ -51,6 +57,12 @@ function UserInfo() {
 
 export default function SidebarUserDropdown() {
   const { isMobile } = useSidebar();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await authClient.signOut();
+    router.push("/home");
+  };
 
   return (
     <SidebarMenu>
@@ -78,25 +90,33 @@ export default function SidebarUserDropdown() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserIcon />
-                My Account
+              <DropdownMenuItem asChild>
+                <Link href="/account">
+                  <UserIcon />
+                  My Account
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <SettingsIcon />
-                Settings
+              <DropdownMenuItem asChild>
+                <Link href="/settings">
+                  <SettingsIcon />
+                  Settings
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon />
-                Billing
+              <DropdownMenuItem asChild>
+                <Link href="/billing">
+                  <CreditCardIcon />
+                  Billing
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <UsersIcon />
-                Manage Team
+              <DropdownMenuItem asChild>
+                <Link href="/team">
+                  <UsersIcon />
+                  Manage Team
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOutIcon />
               Log out
             </DropdownMenuItem>
