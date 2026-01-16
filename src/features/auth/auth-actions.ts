@@ -1,8 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { AuthValidationError, sendOtp, verifyOtp } from "./auth-service";
+import { sendOtp, verifyOtp } from "./auth-service";
 import { ActionState } from "./auth-types";
+import { AuthValidationError } from "./auth-errors";
 
 export async function sendOtpAction(
   _prevState: ActionState,
