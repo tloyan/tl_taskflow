@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Project, Workspace } from "@/shared/mocks";
+import { Workspace } from "@/features/workspace/workspace-types";
+import { Project } from "@/shared/mocks";
 import Link from "next/link";
 
 type DashboardHeaderProps = {

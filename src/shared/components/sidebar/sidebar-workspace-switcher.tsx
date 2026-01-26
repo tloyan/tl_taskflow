@@ -22,7 +22,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { WorkspaceWithCounts } from "@/shared/mocks";
+
+import { WorkspaceWithCounts } from "@/features/workspace/workspace-types";
 
 type SidebarWorkspaceSwitcherProps = {
   workspaces: WorkspaceWithCounts[];
