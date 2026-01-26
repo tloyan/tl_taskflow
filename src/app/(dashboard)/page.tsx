@@ -1,8 +1,8 @@
-import { getAllWorkspacesWithCounts } from "@/shared/mocks";
+import { getAllWorkspacesWithCountsDal } from "@/features/workspace/workspace-dal";
 import Link from "next/link";
 
 export default async function Page() {
-  const workspaces = await getAllWorkspacesWithCounts();
+  const workspaces = await getAllWorkspacesWithCountsDal();
 
   return (
     <div>

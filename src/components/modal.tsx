@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Dialog, DialogOverlay, DialogContent, DialogTitle } from "./ui/dialog";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export default function Modal({
@@ -13,13 +13,25 @@ export default function Modal({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  // Capture initial pathname once using initializer function
+  const [initialPathname] = useState(() => pathname);
 
-  const handleOpenChange = () => {
-    router.back();
+  // Modal is open only if we're still on the initial pathname
+  const isOpen = pathname === initialPathname;
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      router.back();
+    }
   };
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
-    <Dialog defaultOpen={true} open={true} onOpenChange={handleOpenChange}>
+    <Dialog open={true} onOpenChange={handleOpenChange}>
       <DialogOverlay>
         <VisuallyHidden>
           <DialogTitle>{title}</DialogTitle>
