@@ -1,9 +1,10 @@
 "use client";
 
-import { Project, WorkspaceWithCounts } from "@/shared/mocks";
+import { Project } from "@/shared/mocks";
 import AppSidebar from "@/shared/components/sidebar/app-sidebar";
 import DashboardHeader from "@/shared/components/layouts/dashboard-header";
 import { useParams } from "next/navigation";
+import { WorkspaceWithCounts } from "@/features/workspace/workspace-types";
 
 type DashboardLayoutClientProps = {
   children: Readonly<React.ReactNode>;

@@ -1,6 +1,6 @@
-import { getWorkspaceBySlug, getProjectsByWorkspaceId } from "@/shared/mocks";
+import { getWorkspaceBySlugDal } from "@/features/workspace/workspace-dal";
+import { getProjectsByWorkspaceId } from "@/shared/mocks";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
 export default async function Page({
   params,
@@ -8,12 +8,8 @@ export default async function Page({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const workspace = await getWorkspaceBySlug(slug);
-
-  if (!workspace) {
-    notFound();
-  }
-
+  // getWorkspaceBySlugDal throws notFound() if workspace doesn't exist or user lacks access
+  const workspace = await getWorkspaceBySlugDal(slug);
   const projects = await getProjectsByWorkspaceId(workspace.id);
 
   return (
