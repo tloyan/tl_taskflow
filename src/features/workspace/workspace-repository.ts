@@ -2,7 +2,8 @@ import "server-only";
 
 import { db } from "@/db";
 import { NewWorkspace, workspaces } from "@/db/schema/workspaces";
-import { eq } from "drizzle-orm";
+import { workspaceMembers } from "@/db/schema/workspace-members";
+import { count, eq, inArray } from "drizzle-orm";
 import type { Workspace } from "./workspace-types";
 
 /** Data required to update a workspace */
@@ -14,8 +15,12 @@ export type UpdateWorkspaceData = {
 
 export async function createWorkspaceRepository(
   workspace: NewWorkspace
-): Promise<void> {
-  await db.insert(workspaces).values(workspace);
+): Promise<{ id: string }> {
+  const [created] = await db
+    .insert(workspaces)
+    .values(workspace)
+    .returning({ id: workspaces.id });
+  return created;
 }
 
 export async function getWorkspaceBySlugRepository(
@@ -57,4 +62,51 @@ export async function updateWorkspaceRepository(
 
 export async function deleteWorkspaceRepository(id: string): Promise<void> {
   await db.delete(workspaces).where(eq(workspaces.id, id));
+}
+
+export async function getWorkspacesWithCountsByUserIdRepository(
+  userId: string
+): Promise<
+  {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    ownerId: string;
+    createdAt: Date;
+    updatedAt: Date;
+    membersCount: number;
+  }[]
+> {
+  const memberRows = await db
+    .select({ workspaceId: workspaceMembers.workspaceId })
+    .from(workspaceMembers)
+    .where(eq(workspaceMembers.userId, userId));
+
+  const workspaceIds = memberRows.map((r) => r.workspaceId);
+
+  if (workspaceIds.length === 0) {
+    return [];
+  }
+
+  const rows = await db
+    .select({
+      id: workspaces.id,
+      name: workspaces.name,
+      slug: workspaces.slug,
+      description: workspaces.description,
+      ownerId: workspaces.ownerId,
+      createdAt: workspaces.createdAt,
+      updatedAt: workspaces.updatedAt,
+      membersCount: count(workspaceMembers.userId),
+    })
+    .from(workspaces)
+    .leftJoin(workspaceMembers, eq(workspaces.id, workspaceMembers.workspaceId))
+    .where(inArray(workspaces.id, workspaceIds))
+    .groupBy(workspaces.id);
+
+  return rows.map((row) => ({
+    ...row,
+    membersCount: Number(row.membersCount),
+  }));
 }

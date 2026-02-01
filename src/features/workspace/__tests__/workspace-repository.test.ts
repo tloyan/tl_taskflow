@@ -9,6 +9,12 @@ const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
 const mockValues = vi.fn().mockResolvedValue(undefined);
 
 // Use vi.hoisted to define mocks before they are hoisted
+const mockGroupBy = vi.fn();
+const mockSelectWhere = vi.fn();
+const mockLeftJoin = vi.fn();
+const mockSelectFrom = vi.fn();
+const mockSelect = vi.fn();
+
 const mockDb = vi.hoisted(() => ({
   query: {
     workspaces: {
@@ -19,6 +25,7 @@ const mockDb = vi.hoisted(() => ({
   insert: vi.fn(),
   update: vi.fn(),
   delete: vi.fn(),
+  select: vi.fn(),
 }));
 
 vi.mock("@/db", () => ({
@@ -27,12 +34,18 @@ vi.mock("@/db", () => ({
 
 // Mock workspaces table for eq() comparisons
 vi.mock("@/db/schema/workspaces", () => ({
-  workspaces: { id: "id" },
+  workspaces: { id: "id", name: "name", slug: "slug", description: "description", ownerId: "ownerId", createdAt: "createdAt", updatedAt: "updatedAt" },
   NewWorkspace: {},
+}));
+
+vi.mock("@/db/schema/workspace-members", () => ({
+  workspaceMembers: { workspaceId: "workspaceId", userId: "userId" },
 }));
 
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn((field, value) => ({ field, value })),
+  inArray: vi.fn((field, values) => ({ field, values })),
+  count: vi.fn((field) => ({ fn: "count", field })),
 }));
 
 // Import after mocking
@@ -43,6 +56,7 @@ import {
   getWorkspacesByOwnerIdRepository,
   updateWorkspaceRepository,
   deleteWorkspaceRepository,
+  getWorkspacesWithCountsByUserIdRepository,
 } from "../workspace-repository";
 
 describe("workspace-repository", () => {
@@ -53,8 +67,14 @@ describe("workspace-repository", () => {
     mockDb.update.mockReturnValue({ set: mockSet });
     mockDb.delete.mockReturnValue({ where: mockWhere });
     mockSet.mockReturnValue({ where: mockWhere });
-    mockValues.mockResolvedValue(undefined);
+    mockValues.mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: "ws-new" }]) });
     mockWhere.mockResolvedValue(undefined);
+    // Setup select chain: select().from().where() and select().from().leftJoin().where().groupBy()
+    mockGroupBy.mockResolvedValue([]);
+    mockSelectWhere.mockReturnValue({ groupBy: mockGroupBy });
+    mockLeftJoin.mockReturnValue({ where: mockSelectWhere });
+    mockSelectFrom.mockReturnValue({ where: vi.fn().mockResolvedValue([]), leftJoin: mockLeftJoin });
+    mockDb.select.mockReturnValue({ from: mockSelectFrom });
   });
 
   describe("createWorkspaceRepository", () => {
@@ -66,9 +86,10 @@ describe("workspace-repository", () => {
         ownerId: "user-1",
       };
 
-      await createWorkspaceRepository(workspace);
+      const result = await createWorkspaceRepository(workspace);
 
       expect(mockDb.insert).toHaveBeenCalled();
+      expect(result).toEqual({ id: "ws-new" });
     });
   });
 
@@ -160,6 +181,50 @@ describe("workspace-repository", () => {
       await deleteWorkspaceRepository("ws-123");
 
       expect(mockDb.delete).toHaveBeenCalled();
+    });
+  });
+
+  describe("getWorkspacesWithCountsByUserIdRepository", () => {
+    it("should return empty array when user has no memberships", async () => {
+      const mockFromWhere = vi.fn().mockResolvedValue([]);
+      mockSelectFrom.mockReturnValue({ where: mockFromWhere, leftJoin: mockLeftJoin });
+
+      const result = await getWorkspacesWithCountsByUserIdRepository("user-1");
+
+      expect(result).toEqual([]);
+    });
+
+    it("should return workspaces with member counts", async () => {
+      const mockFromWhere = vi.fn().mockResolvedValue([{ workspaceId: "ws-1" }]);
+      mockSelectFrom.mockReturnValueOnce({ where: mockFromWhere, leftJoin: mockLeftJoin });
+
+      mockGroupBy.mockResolvedValue([
+        {
+          id: "ws-1",
+          name: "Test",
+          slug: "test",
+          description: null,
+          ownerId: "user-1",
+          createdAt: new Date("2024-01-01"),
+          updatedAt: new Date("2024-01-01"),
+          membersCount: 3,
+        },
+      ]);
+
+      const result = await getWorkspacesWithCountsByUserIdRepository("user-1");
+
+      expect(result).toEqual([
+        {
+          id: "ws-1",
+          name: "Test",
+          slug: "test",
+          description: null,
+          ownerId: "user-1",
+          createdAt: new Date("2024-01-01"),
+          updatedAt: new Date("2024-01-01"),
+          membersCount: 3,
+        },
+      ]);
     });
   });
 });
