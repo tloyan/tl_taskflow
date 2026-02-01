@@ -20,8 +20,9 @@ import { Spinner } from "@/components/ui/spinner";
 
 export function VerifyOTPForm({
   email,
+  callbackUrl,
   ...props
-}: React.ComponentProps<typeof Card> & { email: string }) {
+}: React.ComponentProps<typeof Card> & { email: string; callbackUrl?: string }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(verifyOtpAction, {});
   const [resendPending, resendStartTransition] = useTransition();
@@ -42,6 +43,9 @@ export function VerifyOTPForm({
       <CardContent>
         <form ref={formRef} action={formAction}>
           <input type="hidden" name="email" value={email} />
+          {callbackUrl && (
+            <input type="hidden" name="callbackUrl" value={callbackUrl} />
+          )}
           {state.error && (
             <p className="text-destructive text-sm">{state.error.message}</p>
           )}

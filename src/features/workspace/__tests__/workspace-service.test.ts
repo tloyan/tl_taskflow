@@ -21,6 +21,7 @@ const mockRepository = vi.hoisted(() => ({
   updateWorkspaceRepository: vi.fn(),
   deleteWorkspaceRepository: vi.fn(),
   getWorkspacesByOwnerIdRepository: vi.fn(),
+  getWorkspacesWithCountsByUserIdRepository: vi.fn(),
 }));
 
 // Mock next/headers
@@ -33,8 +34,13 @@ vi.mock("@/lib/auth", () => ({
   auth: mockAuth,
 }));
 
+const mockMemberRepository = vi.hoisted(() => ({
+  addMemberRepository: vi.fn(),
+}));
+
 // Mock repository functions
 vi.mock("../workspace-repository", () => mockRepository);
+vi.mock("../../member/member-repository", () => mockMemberRepository);
 
 // Import after mocking
 import {
@@ -58,7 +64,8 @@ describe("workspace-service", () => {
     it("should create workspace and return slug when valid data provided", async () => {
       mockAuth.api.getSession.mockResolvedValue(mockAuthenticatedSession());
       mockRepository.getWorkspaceBySlugRepository.mockResolvedValue(undefined);
-      mockRepository.createWorkspaceRepository.mockResolvedValue(undefined);
+      mockRepository.createWorkspaceRepository.mockResolvedValue({ id: "ws-new" });
+      mockMemberRepository.addMemberRepository.mockResolvedValue(undefined);
 
       const result = await createWorkspace(validCreateInput);
 

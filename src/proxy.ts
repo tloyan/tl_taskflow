@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 const publicRoutes = ["/home", "/login", "/verify-otp"];
+const publicPrefixes = ["/invite/"];
 const authRoutes = ["/login", "/verify-otp"];
 
 export async function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
 
   const { pathname } = request.nextUrl;
-  const isPublic = publicRoutes.includes(pathname);
+  const isPublic =
+    publicRoutes.includes(pathname) ||
+    publicPrefixes.some((prefix) => pathname.startsWith(prefix));
   const isAuthRoute = authRoutes.includes(pathname);
 
   if (!sessionCookie && !isPublic) {
