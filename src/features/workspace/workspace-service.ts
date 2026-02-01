@@ -20,6 +20,7 @@ import {
   getWorkspaceBySlugRepository,
   updateWorkspaceRepository,
 } from "./workspace-repository";
+import { addMemberRepository } from "../member/member-repository";
 import type { z } from "zod";
 
 /**
@@ -46,9 +47,15 @@ export async function createWorkspace(data: unknown): Promise<string> {
     throw new WorkspaceValidationError("slug", "Ce slug est déjà utilisé");
   }
 
-  await createWorkspaceRepository({
+  const { id } = await createWorkspaceRepository({
     ...parsed.data,
     ownerId: session.user.id,
+  });
+
+  await addMemberRepository({
+    workspaceId: id,
+    userId: session.user.id,
+    role: "owner",
   });
 
   return parsed.data.slug;

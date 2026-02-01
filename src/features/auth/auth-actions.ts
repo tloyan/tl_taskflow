@@ -5,6 +5,13 @@ import { sendOtp, verifyOtp } from "./auth-service";
 import { ActionState } from "./auth-types";
 import { AuthValidationError } from "./auth-errors";
 
+function sanitizeCallbackUrl(url: string | null): string {
+  if (url && url.startsWith("/") && !url.startsWith("//")) {
+    return url;
+  }
+  return "/";
+}
+
 export async function sendOtpAction(
   _prevState: ActionState,
   formData: FormData
@@ -32,8 +39,15 @@ export async function sendOtpAction(
       error: { code: "UNKNOWN_ERROR", message: "Une erreur est survenue" },
     };
   }
+  const callbackUrl = sanitizeCallbackUrl(
+    formData.get("callbackUrl") as string | null
+  );
+  const params = new URLSearchParams({ email });
+  if (callbackUrl !== "/") {
+    params.set("callbackUrl", callbackUrl);
+  }
   // could not be in try catch
-  redirect(`/verify-otp?email=${encodeURIComponent(email)}`);
+  redirect(`/verify-otp?${params.toString()}`);
 }
 
 export async function resendOtpAction(email: unknown): Promise<ActionState> {
@@ -98,5 +112,8 @@ export async function verifyOtpAction(
       error: { code: "UNKNOWN_ERROR", message: "Une erreur est survenue" },
     };
   }
-  redirect(`/`);
+  const callbackUrl = sanitizeCallbackUrl(
+    formData.get("callbackUrl") as string | null
+  );
+  redirect(callbackUrl);
 }

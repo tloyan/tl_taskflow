@@ -15,14 +15,19 @@ import { sendOtpAction } from "../auth-actions";
 import { useActionState } from "react";
 import { authClient } from "@/lib/auth-client";
 
-type LoginFormProps = {} & React.ComponentProps<"div">;
+type LoginFormProps = {
+  callbackUrl?: string;
+} & React.ComponentProps<"div">;
 
-export function LoginForm({ className, ...props }: LoginFormProps) {
+export function LoginForm({ className, callbackUrl, ...props }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(sendOtpAction, {});
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <form action={formAction}>
+        {callbackUrl && (
+          <input type="hidden" name="callbackUrl" value={callbackUrl} />
+        )}
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
             <div className="flex size-8 items-center justify-center rounded-md">
@@ -57,7 +62,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
               onClick={() =>
                 authClient.signIn.social({
                   provider: "github",
-                  callbackURL: "/",
+                  callbackURL: callbackUrl || "/",
                 })
               }
             >
@@ -72,7 +77,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
               onClick={() =>
                 authClient.signIn.social({
                   provider: "google",
-                  callbackURL: "/",
+                  callbackURL: callbackUrl || "/",
                 })
               }
             >

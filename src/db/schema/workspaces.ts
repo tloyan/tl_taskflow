@@ -20,16 +20,3 @@ export const workspaces = pgTable(
 );
 
 export type NewWorkspace = typeof workspaces.$inferInsert;
-
-// export const roleEnum = pgEnum("role", ["OWNER", "ADMIN", "MEMBER", "VIEWER"]);
-
-// export const workspace_members = pgTable("workspace_members", {
-//   userId: text()
-//     .notNull()
-//     .references(() => user.id),
-//   workspaceId: uuid()
-//     .notNull()
-//     .references(() => workspaces.id),
-//   role: roleEnum(),
-//   join_at: timestamp().defaultNow(),
-// });

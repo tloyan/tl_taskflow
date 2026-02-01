@@ -4,8 +4,9 @@ import "server-only";
 import { getCurrentUserDal } from "../auth/auth-dal";
 import {
   getWorkspaceBySlugRepository,
-  getWorkspacesByOwnerIdRepository,
+  getWorkspacesWithCountsByUserIdRepository,
 } from "./workspace-repository";
+import { getMemberRepository } from "../member/member-repository";
 import { Workspace, WorkspaceWithCounts } from "./workspace-types";
 
 export const getAllWorkspacesWithCountsDal = cache(
@@ -16,14 +17,8 @@ export const getAllWorkspacesWithCountsDal = cache(
       redirect("/login");
     }
 
-    const workspaces = await getWorkspacesByOwnerIdRepository(user.id);
-
-    // TODO: Add actual counts when members and projects tables are implemented
-    return workspaces.map((workspace) => ({
-      ...workspace,
-      projectsCount: 0,
-      membersCount: 1, // Owner is always a member
-    }));
+    const rows = await getWorkspacesWithCountsByUserIdRepository(user.id);
+    return rows.map((row) => ({ ...row, projectsCount: 0 }));
   }
 );
 
@@ -41,8 +36,9 @@ export const getWorkspaceBySlugDal = cache(
       notFound();
     }
 
-    // Verify user has access to this workspace (owner check for now)
-    if (workspace.ownerId !== user.id) {
+    // Check membership (not just owner)
+    const member = await getMemberRepository(workspace.id, user.id);
+    if (!member) {
       notFound();
     }
 
