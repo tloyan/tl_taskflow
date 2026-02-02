@@ -7,6 +7,7 @@ import {
   getWorkspacesWithCountsByUserIdRepository,
 } from "./workspace-repository";
 import { getMemberRepository } from "../member/member-repository";
+import { getProjectsByWorkspaceIdRepository } from "../project/project-repository";
 import { Workspace, WorkspaceWithCounts } from "./workspace-types";
 
 export const getAllWorkspacesWithCountsDal = cache(
@@ -18,7 +19,16 @@ export const getAllWorkspacesWithCountsDal = cache(
     }
 
     const rows = await getWorkspacesWithCountsByUserIdRepository(user.id);
-    return rows.map((row) => ({ ...row, projectsCount: 0 }));
+
+    const withProjectCounts = await Promise.all(
+      rows.map(async (row) => {
+        const projects = await getProjectsByWorkspaceIdRepository(row.id);
+        const activeProjects = projects.filter((p) => p.status === "active");
+        return { ...row, projectsCount: activeProjects.length };
+      })
+    );
+
+    return withProjectCounts;
   }
 );
 
