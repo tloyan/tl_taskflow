@@ -11,7 +11,9 @@ pnpm lint         # ESLint
 pnpm test         # Vitest (watch mode)
 pnpm test:run     # Vitest (single run)
 pnpm test:run src/features/workspace/__tests__/workspace-service.test.ts  # Single test file
-pnpm db:push      # Push Drizzle schema to database
+pnpm db:generate # Generate migration schema
+pnpm db:migrate # Migrate data
+pnpm db:push # force push database schema
 ```
 
 ## Tech Stack
@@ -48,6 +50,7 @@ Component → Action (server action) → Service → Repository → Database
 ### Error Handling Pattern
 
 Each feature defines its own error classes and error codes:
+
 ```typescript
 export const WORKSPACE_ERROR_CODES = { VALIDATION_ERROR: "VALIDATION_ERROR", ... } as const;
 export class WorkspaceValidationError extends Error { ... }
