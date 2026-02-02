@@ -1,6 +1,6 @@
 "use client";
 
-import { Project } from "@/shared/mocks";
+import type { Project } from "@/features/project/project-types";
 import AppSidebar from "@/shared/components/sidebar/app-sidebar";
 import DashboardHeader from "@/shared/components/layouts/dashboard-header";
 import { useParams } from "next/navigation";
