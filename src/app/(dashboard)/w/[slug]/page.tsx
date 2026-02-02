@@ -1,6 +1,5 @@
 import { getWorkspaceBySlugDal } from "@/features/workspace/workspace-dal";
-import { getProjectsByWorkspaceId } from "@/shared/mocks";
-import Link from "next/link";
+import ProjectList from "@/features/project/components/project-list";
 
 export default async function Page({
   params,
@@ -8,9 +7,7 @@ export default async function Page({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  // getWorkspaceBySlugDal throws notFound() if workspace doesn't exist or user lacks access
   const workspace = await getWorkspaceBySlugDal(slug);
-  const projects = await getProjectsByWorkspaceId(workspace.id);
 
   return (
     <div>
@@ -19,26 +16,9 @@ export default async function Page({
         <p className="text-muted-foreground">{workspace.description}</p>
       )}
 
-      <h2 className="mt-6 text-xl font-semibold">
-        Projects ({projects.length})
-      </h2>
-      <ul className="mt-2 space-y-2">
-        {projects.map((project) => (
-          <li key={project.id}>
-            <Link
-              href={`/w/${slug}/p/${project.id}`}
-              className="block rounded border p-3 transition-colors hover:bg-muted"
-            >
-              <span className="font-medium">{project.name}</span>
-              {project.description && (
-                <p className="text-sm text-muted-foreground">
-                  {project.description}
-                </p>
-              )}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="mt-6">
+        <ProjectList workspaceId={workspace.id} workspaceSlug={slug} />
+      </div>
     </div>
   );
 }

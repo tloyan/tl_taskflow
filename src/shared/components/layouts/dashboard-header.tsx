@@ -11,7 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Workspace } from "@/features/workspace/workspace-types";
-import { Project } from "@/shared/mocks";
+import type { Project } from "@/features/project/project-types";
 import Link from "next/link";
 
 type DashboardHeaderProps = {

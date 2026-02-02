@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import SidebarNavGroup, { MenuItem } from "./sidebar-nav-group";
-import { Project } from "@/shared/mocks";
+import type { Project } from "@/features/project/project-types";
 import { WorkspaceWithCounts } from "@/features/workspace/workspace-types";
 
 type AppSidebarProps = {

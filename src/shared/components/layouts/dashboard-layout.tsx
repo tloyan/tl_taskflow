@@ -1,9 +1,9 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { getAllProjects } from "@/shared/mocks";
 import DashboardLayoutClient from "@/shared/components/layouts/dashboard-layout-client";
 import { getCurrentUserDal } from "@/features/auth/auth-dal";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { getAllWorkspacesWithCountsDal } from "@/features/workspace/workspace-dal";
+import { getAllProjectsDal } from "@/features/project/project-dal";
 
 type DashboardLayoutProps = {
   children: Readonly<React.ReactNode>;
@@ -15,7 +15,7 @@ export default async function DashboardLayout({
   const user = await getCurrentUserDal();
   const [workspaces, projects] = await Promise.all([
     getAllWorkspacesWithCountsDal(),
-    getAllProjects(),
+    getAllProjectsDal(),
   ]);
 
   return (
