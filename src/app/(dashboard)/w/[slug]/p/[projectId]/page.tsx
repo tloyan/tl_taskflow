@@ -1,9 +1,17 @@
 import { getWorkspaceBySlugDal } from "@/features/workspace/workspace-dal";
 import { getProjectByIdDal } from "@/features/project/project-dal";
+import { getTasksByProjectIdDal } from "@/features/task/task-dal";
+import { getCommentsByTaskIdDal } from "@/features/comment/comment-dal";
+import {
+  getWorkspaceMembersDal,
+  getCurrentMemberDal,
+} from "@/features/member/member-dal";
+import { getCurrentUserDal } from "@/features/auth/auth-dal";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import TaskView from "@/features/task/components/task-view";
 
 export default async function Page({
   params,
@@ -17,6 +25,22 @@ export default async function Page({
   if (project.workspaceId !== workspace.id) {
     notFound();
   }
+
+  const [tasks, members, currentMember, currentUser] = await Promise.all([
+    getTasksByProjectIdDal(projectId),
+    getWorkspaceMembersDal(slug),
+    getCurrentMemberDal(slug),
+    getCurrentUserDal(),
+  ]);
+
+  // Fetch comments for all tasks
+  const allComments = (
+    await Promise.all(
+      tasks.map((task) => getCommentsByTaskIdDal(task.id))
+    )
+  ).flat();
+
+  const pathToRevalidate = `/w/${slug}/p/${projectId}`;
 
   return (
     <div>
@@ -41,11 +65,16 @@ export default async function Page({
         <p className="text-muted-foreground mt-1">{project.description}</p>
       )}
 
-      <div className="text-muted-foreground mt-8 flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
-        <p className="text-lg">Tâches</p>
-        <p className="text-sm">
-          Les tâches seront disponibles prochainement.
-        </p>
+      <div className="mt-6">
+        <TaskView
+          tasks={tasks}
+          members={members}
+          comments={allComments}
+          projectId={projectId}
+          currentUserId={currentUser?.id ?? ""}
+          currentUserRole={currentMember?.role ?? "viewer"}
+          pathToRevalidate={pathToRevalidate}
+        />
       </div>
     </div>
   );

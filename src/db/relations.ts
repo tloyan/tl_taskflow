@@ -4,9 +4,11 @@ import * as workspaces from "./schema/workspaces";
 import * as workspaceMembers from "./schema/workspace-members";
 import * as workspaceInvitations from "./schema/workspace-invitations";
 import * as projects from "./schema/projects";
+import * as tasks from "./schema/tasks";
+import * as comments from "./schema/comments";
 
 export const relations = defineRelations(
-  { ...auth, ...workspaces, ...workspaceMembers, ...workspaceInvitations, ...projects },
+  { ...auth, ...workspaces, ...workspaceMembers, ...workspaceInvitations, ...projects, ...tasks, ...comments },
   (r) => ({
     user: {
       session: r.many.session(),
@@ -59,6 +61,32 @@ export const relations = defineRelations(
       workspace: r.one.workspaces({
         from: r.projects.workspaceId,
         to: r.workspaces.id,
+      }),
+      tasks: r.many.tasks(),
+    },
+    tasks: {
+      project: r.one.projects({
+        from: r.tasks.projectId,
+        to: r.projects.id,
+      }),
+      assignee: r.one.user({
+        from: r.tasks.assigneeId,
+        to: r.user.id,
+      }),
+      creator: r.one.user({
+        from: r.tasks.creatorId,
+        to: r.user.id,
+      }),
+      comments: r.many.comments(),
+    },
+    comments: {
+      task: r.one.tasks({
+        from: r.comments.taskId,
+        to: r.tasks.id,
+      }),
+      author: r.one.user({
+        from: r.comments.authorId,
+        to: r.user.id,
       }),
     },
   })
