@@ -16,7 +16,6 @@ export type InvitationWithInviter = {
   workspaceId: string;
   email: string;
   role: string;
-  token: string;
   invitedById: string;
   status: string;
   expiresAt: Date;

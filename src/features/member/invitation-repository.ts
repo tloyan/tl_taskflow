@@ -12,8 +12,12 @@ import type { InvitationWithInviter } from "./member-types";
 
 export async function createInvitationRepository(
   data: NewWorkspaceInvitation
-): Promise<void> {
-  await db.insert(workspaceInvitations).values(data);
+): Promise<{ id: string }> {
+  const [created] = await db
+    .insert(workspaceInvitations)
+    .values(data)
+    .returning({ id: workspaceInvitations.id });
+  return created;
 }
 
 export async function getInvitationByTokenRepository(token: string) {
@@ -85,7 +89,6 @@ export async function getPendingInvitationsByWorkspaceIdRepository(
       workspaceId: workspaceInvitations.workspaceId,
       email: workspaceInvitations.email,
       role: workspaceInvitations.role,
-      token: workspaceInvitations.token,
       invitedById: workspaceInvitations.invitedById,
       status: workspaceInvitations.status,
       expiresAt: workspaceInvitations.expiresAt,
@@ -120,19 +123,23 @@ export async function getInvitationByIdRepository(id: string) {
 export async function updateInvitationStatusRepository(
   id: string,
   status: string
-): Promise<void> {
-  await db
+): Promise<{ id: string }> {
+  const [updated] = await db
     .update(workspaceInvitations)
     .set({ status })
-    .where(eq(workspaceInvitations.id, id));
+    .where(eq(workspaceInvitations.id, id))
+    .returning({ id: workspaceInvitations.id });
+  return updated;
 }
 
 export async function updateInvitationRoleRepository(
   id: string,
   role: string
-): Promise<void> {
-  await db
+): Promise<{ id: string }> {
+  const [updated] = await db
     .update(workspaceInvitations)
     .set({ role })
-    .where(eq(workspaceInvitations.id, id));
+    .where(eq(workspaceInvitations.id, id))
+    .returning({ id: workspaceInvitations.id });
+  return updated;
 }

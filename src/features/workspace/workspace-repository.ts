@@ -56,12 +56,23 @@ export async function getWorkspacesByOwnerIdRepository(
 export async function updateWorkspaceRepository(
   id: string,
   data: UpdateWorkspaceData
-): Promise<void> {
-  await db.update(workspaces).set(data).where(eq(workspaces.id, id));
+): Promise<{ id: string }> {
+  const [updated] = await db
+    .update(workspaces)
+    .set(data)
+    .where(eq(workspaces.id, id))
+    .returning({ id: workspaces.id });
+  return updated;
 }
 
-export async function deleteWorkspaceRepository(id: string): Promise<void> {
-  await db.delete(workspaces).where(eq(workspaces.id, id));
+export async function deleteWorkspaceRepository(
+  id: string
+): Promise<{ id: string }> {
+  const [deleted] = await db
+    .delete(workspaces)
+    .where(eq(workspaces.id, id))
+    .returning({ id: workspaces.id });
+  return deleted;
 }
 
 export async function getWorkspacesWithCountsByUserIdRepository(

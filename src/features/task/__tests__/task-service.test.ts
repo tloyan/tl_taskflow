@@ -306,7 +306,7 @@ describe("task-service", () => {
   describe("updateTaskAssignee", () => {
     const validInput = {
       id: "550e8400-e29b-41d4-a716-446655440001",
-      assigneeId: "user-456",
+      assigneeId: "550e8400-e29b-41d4-a716-446655440002",
     };
 
     it("should update task assignee when valid", async () => {
@@ -315,14 +315,16 @@ describe("task-service", () => {
         createMockTask({ id: validInput.id })
       );
       mockProjectRepository.getProjectByIdRepository.mockResolvedValue(mockProject);
-      mockMemberRepository.getMemberRepository.mockResolvedValue(memberMember);
+      mockMemberRepository.getMemberRepository
+        .mockResolvedValueOnce(memberMember)
+        .mockResolvedValueOnce({ role: "member", userId: "550e8400-e29b-41d4-a716-446655440002", workspaceId: "ws-123" });
       mockTaskRepository.updateTaskRepository.mockResolvedValue(undefined);
 
       await updateTaskAssignee(validInput);
 
       expect(mockTaskRepository.updateTaskRepository).toHaveBeenCalledWith(
         validInput.id,
-        { assigneeId: "user-456" }
+        { assigneeId: "550e8400-e29b-41d4-a716-446655440002" }
       );
     });
 

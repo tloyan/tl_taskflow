@@ -6,7 +6,8 @@ import { ActionState } from "./auth-types";
 import { AuthValidationError } from "./auth-errors";
 
 function sanitizeCallbackUrl(url: string | null): string {
-  if (url && url.startsWith("/") && !url.startsWith("//")) {
+  if (!url) return "/";
+  if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) {
     return url;
   }
   return "/";

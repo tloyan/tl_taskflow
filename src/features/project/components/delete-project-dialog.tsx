@@ -40,7 +40,6 @@ export default function DeleteProjectDialog({
     setIsDeleting(true);
     const result = await deleteProjectAction(
       { id: project.id, confirmName },
-      project.name,
       workspaceSlug
     );
 

@@ -97,7 +97,7 @@ export async function updateWorkspace(data: unknown): Promise<string> {
   return parsed.data.slug;
 }
 
-export async function deleteWorkspace(data: unknown, workspaceName: string): Promise<void> {
+export async function deleteWorkspace(data: unknown): Promise<void> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) throw new AuthError();
 
@@ -114,7 +114,7 @@ export async function deleteWorkspace(data: unknown, workspaceName: string): Pro
     throw new WorkspacePermissionError();
   }
 
-  if (parsed.data.confirmName !== workspaceName) {
+  if (parsed.data.confirmName !== workspace.name) {
     throw new WorkspaceValidationError(
       "confirmName",
       "Le nom ne correspond pas"

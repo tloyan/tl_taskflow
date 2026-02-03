@@ -189,7 +189,6 @@ describe("project-actions", () => {
       await expect(
         deleteProjectAction(
           { id: "project-1", confirmName: "Test" },
-          "Test",
           "my-workspace"
         )
       ).rejects.toThrow("NEXT_REDIRECT:/w/my-workspace");
@@ -202,7 +201,6 @@ describe("project-actions", () => {
 
       const result = await deleteProjectAction(
         { id: "project-1", confirmName: "Test" },
-        "Test",
         "my-workspace"
       );
 
@@ -218,7 +216,6 @@ describe("project-actions", () => {
 
       const result = await deleteProjectAction(
         { id: "project-1", confirmName: "Wrong" },
-        "Test",
         "my-workspace"
       );
 
@@ -236,7 +233,6 @@ describe("project-actions", () => {
 
       const result = await deleteProjectAction(
         { id: "project-1", confirmName: "Test" },
-        "Test",
         "my-workspace"
       );
 

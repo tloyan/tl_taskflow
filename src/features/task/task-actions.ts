@@ -28,7 +28,6 @@ import type {
 } from "./task-types";
 
 function handleError(err: unknown): TaskActionResultError {
-  console.error(err);
   if (err instanceof AuthError) {
     return {
       error: { code: "AUTHENTICATION_ERROR", message: err.message },

@@ -37,8 +37,7 @@ export default function DeleteWorkspaceDialog({
 
     setIsDeleting(true);
     const result = await deleteWorkspaceAction(
-      { id: workspace.id, confirmName },
-      workspace.name
+      { id: workspace.id, confirmName }
     );
 
     if (result?.error) {

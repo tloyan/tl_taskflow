@@ -34,34 +34,32 @@ function getFieldFromZodError(issue: z.ZodIssue): string {
   return typeof field === "string" ? field : String(field);
 }
 
-function assertTaskPermission(
-  role: string,
-  requiredRoles: MemberRole[]
-): void {
+function assertTaskPermission(role: string, requiredRoles: MemberRole[]): void {
   if (!requiredRoles.includes(role as MemberRole)) {
     throw new TaskPermissionError();
   }
 }
 
-async function getSessionAndMember(projectId: string) {
+async function getSessionOrThrow() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) throw new AuthError();
+  return session;
+}
 
+async function getMemberForTask(workspaceId: string, userId: string) {
+  const member = await getMemberRepository(workspaceId, userId);
+  if (!member) throw new TaskPermissionError();
+  return member;
+}
+
+async function getProjectForTask(projectId: string) {
   const project = await getProjectByIdRepository(projectId);
   if (!project) throw new TaskNotFoundError("Projet introuvable");
-
-  const member = await getMemberRepository(
-    project.workspaceId,
-    session.user.id
-  );
-  if (!member) throw new TaskPermissionError();
-
-  return { session, project, member };
+  return project;
 }
 
 export async function createTask(data: unknown): Promise<string> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new AuthError();
+  const session = await getSessionOrThrow();
 
   const parsed = createTaskSchema.safeParse(data);
   if (!parsed.success) {
@@ -69,19 +67,26 @@ export async function createTask(data: unknown): Promise<string> {
     throw new TaskValidationError(getFieldFromZodError(err), err.message);
   }
 
-  const project = await getProjectByIdRepository(parsed.data.projectId);
-  if (!project) throw new TaskNotFoundError("Projet introuvable");
-
-  const member = await getMemberRepository(
-    project.workspaceId,
-    session.user.id
-  );
-  if (!member) throw new TaskPermissionError();
+  const project = await getProjectForTask(parsed.data.projectId);
+  const member = await getMemberForTask(project.workspaceId, session.user.id);
   assertTaskPermission(member.role, ["owner", "admin", "member"]);
+
+  if (parsed.data.assigneeId) {
+    const assigneeMember = await getMemberRepository(
+      project.workspaceId,
+      parsed.data.assigneeId,
+    );
+    if (!assigneeMember) {
+      throw new TaskValidationError(
+        "assigneeId",
+        "L'assigné doit être membre du workspace",
+      );
+    }
+  }
 
   const maxPosition = await getMaxPositionByStatusRepository(
     parsed.data.projectId,
-    parsed.data.status
+    parsed.data.status,
   );
 
   const { id } = await createTaskRepository({
@@ -100,8 +105,7 @@ export async function createTask(data: unknown): Promise<string> {
 }
 
 export async function updateTask(data: unknown): Promise<void> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new AuthError();
+  const session = await getSessionOrThrow();
 
   const parsed = updateTaskSchema.safeParse(data);
   if (!parsed.success) {
@@ -112,8 +116,22 @@ export async function updateTask(data: unknown): Promise<void> {
   const task = await getTaskByIdRepository(parsed.data.id);
   if (!task) throw new TaskNotFoundError();
 
-  const { member } = await getSessionAndMember(task.projectId);
+  const project = await getProjectForTask(task.projectId);
+  const member = await getMemberForTask(project.workspaceId, session.user.id);
   assertTaskPermission(member.role, ["owner", "admin", "member"]);
+
+  if (parsed.data.assigneeId) {
+    const assigneeMember = await getMemberRepository(
+      project.workspaceId,
+      parsed.data.assigneeId,
+    );
+    if (!assigneeMember) {
+      throw new TaskValidationError(
+        "assigneeId",
+        "L'assigné doit être membre du workspace",
+      );
+    }
+  }
 
   await updateTaskRepository(parsed.data.id, {
     title: parsed.data.title,
@@ -126,8 +144,7 @@ export async function updateTask(data: unknown): Promise<void> {
 }
 
 export async function deleteTask(data: unknown): Promise<string> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new AuthError();
+  const session = await getSessionOrThrow();
 
   const parsed = deleteTaskSchema.safeParse(data);
   if (!parsed.success) {
@@ -138,7 +155,8 @@ export async function deleteTask(data: unknown): Promise<string> {
   const task = await getTaskByIdRepository(parsed.data.id);
   if (!task) throw new TaskNotFoundError();
 
-  const { member } = await getSessionAndMember(task.projectId);
+  const project = await getProjectForTask(task.projectId);
+  const member = await getMemberForTask(project.workspaceId, session.user.id);
 
   // Members can only delete their own tasks, owner/admin can delete any
   if (member.role === "member" && task.creatorId !== session.user.id) {
@@ -152,8 +170,7 @@ export async function deleteTask(data: unknown): Promise<string> {
 }
 
 export async function updateTaskStatus(data: unknown): Promise<void> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new AuthError();
+  const session = await getSessionOrThrow();
 
   const parsed = updateTaskStatusSchema.safeParse(data);
   if (!parsed.success) {
@@ -164,7 +181,8 @@ export async function updateTaskStatus(data: unknown): Promise<void> {
   const task = await getTaskByIdRepository(parsed.data.id);
   if (!task) throw new TaskNotFoundError();
 
-  const { member } = await getSessionAndMember(task.projectId);
+  const project = await getProjectForTask(task.projectId);
+  const member = await getMemberForTask(project.workspaceId, session.user.id);
   assertTaskPermission(member.role, ["owner", "admin", "member"]);
 
   await updateTaskRepository(parsed.data.id, {
@@ -173,8 +191,7 @@ export async function updateTaskStatus(data: unknown): Promise<void> {
 }
 
 export async function updateTaskPriority(data: unknown): Promise<void> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new AuthError();
+  const session = await getSessionOrThrow();
 
   const parsed = updateTaskPrioritySchema.safeParse(data);
   if (!parsed.success) {
@@ -185,7 +202,8 @@ export async function updateTaskPriority(data: unknown): Promise<void> {
   const task = await getTaskByIdRepository(parsed.data.id);
   if (!task) throw new TaskNotFoundError();
 
-  const { member } = await getSessionAndMember(task.projectId);
+  const project = await getProjectForTask(task.projectId);
+  const member = await getMemberForTask(project.workspaceId, session.user.id);
   assertTaskPermission(member.role, ["owner", "admin", "member"]);
 
   await updateTaskRepository(parsed.data.id, {
@@ -194,8 +212,7 @@ export async function updateTaskPriority(data: unknown): Promise<void> {
 }
 
 export async function updateTaskAssignee(data: unknown): Promise<void> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new AuthError();
+  const session = await getSessionOrThrow();
 
   const parsed = updateTaskAssigneeSchema.safeParse(data);
   if (!parsed.success) {
@@ -206,8 +223,22 @@ export async function updateTaskAssignee(data: unknown): Promise<void> {
   const task = await getTaskByIdRepository(parsed.data.id);
   if (!task) throw new TaskNotFoundError();
 
-  const { member } = await getSessionAndMember(task.projectId);
+  const project = await getProjectForTask(task.projectId);
+  const member = await getMemberForTask(project.workspaceId, session.user.id);
   assertTaskPermission(member.role, ["owner", "admin", "member"]);
+
+  if (parsed.data.assigneeId) {
+    const assigneeMember = await getMemberRepository(
+      project.workspaceId,
+      parsed.data.assigneeId,
+    );
+    if (!assigneeMember) {
+      throw new TaskValidationError(
+        "assigneeId",
+        "L'assigné doit être membre du workspace",
+      );
+    }
+  }
 
   await updateTaskRepository(parsed.data.id, {
     assigneeId: parsed.data.assigneeId,
@@ -215,8 +246,7 @@ export async function updateTaskAssignee(data: unknown): Promise<void> {
 }
 
 export async function updateTaskDueDate(data: unknown): Promise<void> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new AuthError();
+  const session = await getSessionOrThrow();
 
   const parsed = updateTaskDueDateSchema.safeParse(data);
   if (!parsed.success) {
@@ -227,7 +257,8 @@ export async function updateTaskDueDate(data: unknown): Promise<void> {
   const task = await getTaskByIdRepository(parsed.data.id);
   if (!task) throw new TaskNotFoundError();
 
-  const { member } = await getSessionAndMember(task.projectId);
+  const project = await getProjectForTask(task.projectId);
+  const member = await getMemberForTask(project.workspaceId, session.user.id);
   assertTaskPermission(member.role, ["owner", "admin", "member"]);
 
   await updateTaskRepository(parsed.data.id, {

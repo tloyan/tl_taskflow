@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createMockComment, createMockCommentWithAuthor } from "./comment.fixtures";
 
-const mockWhere = vi.fn().mockResolvedValue(undefined);
+const mockReturning = vi.fn().mockResolvedValue([{ id: "comment-123" }]);
+const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
 const mockValues = vi.fn();
 const mockOrderBy = vi.fn();
 const mockInnerJoinWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
@@ -64,7 +65,8 @@ describe("comment-repository", () => {
       returning: vi.fn().mockResolvedValue([{ id: "comment-new" }]),
     });
     mockDb.delete.mockReturnValue({ where: mockWhere });
-    mockWhere.mockResolvedValue(undefined);
+    mockReturning.mockResolvedValue([{ id: "comment-123" }]);
+    mockWhere.mockReturnValue({ returning: mockReturning });
     mockOrderBy.mockResolvedValue([]);
     mockInnerJoinWhere.mockReturnValue({ orderBy: mockOrderBy });
     mockInnerJoin.mockReturnValue({ where: mockInnerJoinWhere });

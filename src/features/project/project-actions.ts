@@ -25,7 +25,6 @@ import type {
 } from "./project-types";
 
 function handleError(err: unknown): ProjectActionResultError {
-  console.error(err);
   if (err instanceof AuthError) {
     return {
       error: { code: "AUTHENTICATION_ERROR", message: err.message },
@@ -96,11 +95,10 @@ export async function updateProjectAction(
 
 export async function deleteProjectAction(
   data: { id: string; confirmName: string },
-  projectName: string,
   workspaceSlug: string
 ): Promise<DeleteProjectActionResult> {
   try {
-    await deleteProject(data, projectName);
+    await deleteProject(data);
   } catch (err) {
     return handleError(err);
   }

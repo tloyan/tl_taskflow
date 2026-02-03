@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createMockTask } from "./task.fixtures";
 
-const mockWhere = vi.fn().mockResolvedValue(undefined);
+const mockReturning = vi.fn().mockResolvedValue([{ id: "task-123" }]);
+const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
 const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
 const mockValues = vi.fn();
 const mockOrderBy = vi.fn();
@@ -77,7 +78,8 @@ describe("task-repository", () => {
     mockDb.update.mockReturnValue({ set: mockSet });
     mockSet.mockReturnValue({ where: mockWhere });
     mockDb.delete.mockReturnValue({ where: mockWhere });
-    mockWhere.mockResolvedValue(undefined);
+    mockReturning.mockResolvedValue([{ id: "task-123" }]);
+    mockWhere.mockReturnValue({ returning: mockReturning });
     mockOrderBy.mockResolvedValue([]);
     mockLeftJoinWhere.mockReturnValue({ orderBy: mockOrderBy });
     mockLeftJoin.mockReturnValue({ where: mockLeftJoinWhere });

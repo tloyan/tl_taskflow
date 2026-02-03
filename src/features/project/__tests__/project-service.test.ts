@@ -235,7 +235,7 @@ describe("project-service", () => {
       });
       mockRepository.deleteProjectRepository.mockResolvedValue(undefined);
 
-      const result = await deleteProject(validDeleteProjectInput, "Test Project");
+      const result = await deleteProject(validDeleteProjectInput);
 
       expect(result).toBe("ws-123");
       expect(mockRepository.deleteProjectRepository).toHaveBeenCalledWith(
@@ -247,7 +247,7 @@ describe("project-service", () => {
       mockAuth.api.getSession.mockResolvedValue(null);
 
       await expect(
-        deleteProject(validDeleteProjectInput, "Test Project")
+        deleteProject(validDeleteProjectInput)
       ).rejects.toThrow(AuthError);
     });
 
@@ -255,7 +255,7 @@ describe("project-service", () => {
       mockAuth.api.getSession.mockResolvedValue(mockAuthenticatedSession());
 
       await expect(
-        deleteProject({ ...validDeleteProjectInput, id: "invalid" }, "Test Project")
+        deleteProject({ ...validDeleteProjectInput, id: "invalid" })
       ).rejects.toThrow(ProjectValidationError);
     });
 
@@ -264,7 +264,7 @@ describe("project-service", () => {
       mockRepository.getProjectByIdRepository.mockResolvedValue(undefined);
 
       await expect(
-        deleteProject(validDeleteProjectInput, "Test Project")
+        deleteProject(validDeleteProjectInput)
       ).rejects.toThrow(ProjectNotFoundError);
     });
 
@@ -276,7 +276,7 @@ describe("project-service", () => {
       mockMemberRepository.getMemberRepository.mockResolvedValue(undefined);
 
       await expect(
-        deleteProject(validDeleteProjectInput, "Test Project")
+        deleteProject(validDeleteProjectInput)
       ).rejects.toThrow(ProjectPermissionError);
     });
 
@@ -296,8 +296,7 @@ describe("project-service", () => {
 
       await expect(
         deleteProject(
-          { ...validDeleteProjectInput, confirmName: "Wrong Name" },
-          "Test Project"
+          { ...validDeleteProjectInput, confirmName: "Wrong Name" }
         )
       ).rejects.toThrow(ProjectValidationError);
     });

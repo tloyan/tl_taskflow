@@ -4,7 +4,8 @@ import { createMockWorkspace } from "@/test/mocks/workspace.fixtures";
 // Create persistent mock functions
 const mockFindFirst = vi.fn();
 const mockFindMany = vi.fn();
-const mockWhere = vi.fn().mockResolvedValue(undefined);
+const mockReturning = vi.fn().mockResolvedValue([{ id: "ws-123" }]);
+const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
 const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
 const mockValues = vi.fn().mockResolvedValue(undefined);
 
@@ -68,7 +69,8 @@ describe("workspace-repository", () => {
     mockDb.delete.mockReturnValue({ where: mockWhere });
     mockSet.mockReturnValue({ where: mockWhere });
     mockValues.mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: "ws-new" }]) });
-    mockWhere.mockResolvedValue(undefined);
+    mockReturning.mockResolvedValue([{ id: "ws-123" }]);
+    mockWhere.mockReturnValue({ returning: mockReturning });
     // Setup select chain: select().from().where() and select().from().leftJoin().where().groupBy()
     mockGroupBy.mockResolvedValue([]);
     mockSelectWhere.mockReturnValue({ groupBy: mockGroupBy });

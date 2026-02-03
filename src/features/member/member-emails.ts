@@ -1,3 +1,5 @@
+import "server-only";
+
 import { sendEmail } from "@/lib/email";
 
 function escapeHtml(str: string): string {

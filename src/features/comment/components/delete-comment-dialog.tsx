@@ -31,19 +31,22 @@ export default function DeleteCommentDialog({
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    const result = await deleteCommentAction(
-      { id: commentId },
-      pathToRevalidate
-    );
+    try {
+      const result = await deleteCommentAction(
+        { id: commentId },
+        pathToRevalidate
+      );
 
-    if ("error" in result) {
-      toast.error(result.error.message);
+      if ("error" in result) {
+        toast.error(result.error.message);
+        return;
+      }
+
+      toast.success("Commentaire supprimé");
+      onOpenChange(false);
+    } finally {
       setIsDeleting(false);
-      return;
     }
-
-    toast.success("Commentaire supprimé");
-    onOpenChange(false);
   };
 
   return (

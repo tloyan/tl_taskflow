@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createMockProject } from "./project.fixtures";
 
-const mockWhere = vi.fn().mockResolvedValue(undefined);
+const mockReturning = vi.fn().mockResolvedValue([{ id: "project-123" }]);
+const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
 const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
 const mockValues = vi.fn();
 const mockSelectFromWhere = vi.fn();
@@ -66,7 +67,8 @@ describe("project-repository", () => {
     mockDb.update.mockReturnValue({ set: mockSet });
     mockSet.mockReturnValue({ where: mockWhere });
     mockDb.delete.mockReturnValue({ where: mockWhere });
-    mockWhere.mockResolvedValue(undefined);
+    mockReturning.mockResolvedValue([{ id: "project-123" }]);
+    mockWhere.mockReturnValue({ returning: mockReturning });
     mockSelectFrom.mockReturnValue({ where: mockSelectFromWhere });
     mockDb.select.mockReturnValue({ from: mockSelectFrom });
     mockSelectFromWhere.mockResolvedValue([]);

@@ -90,6 +90,13 @@ export async function inviteMember(data: unknown): Promise<void> {
   if (!currentMember) throw new MemberPermissionError();
   assertMemberPermission(currentMember, ["owner", "admin"]);
 
+  // Only owners can invite as admin
+  if (currentMember.role === "admin" && parsed.data.role === "admin") {
+    throw new MemberPermissionError(
+      "Seul le propriétaire peut inviter en tant qu'administrateur"
+    );
+  }
+
   const email = parsed.data.email.toLowerCase();
 
   // If user already exists and is already a member, reject
@@ -266,6 +273,13 @@ export async function changeInvitationRole(data: unknown): Promise<void> {
   );
   if (!currentMember) throw new MemberPermissionError();
   assertMemberPermission(currentMember, ["owner", "admin"]);
+
+  // Only owners can set invitation role to admin
+  if (currentMember.role === "admin" && parsed.data.role === "admin") {
+    throw new MemberPermissionError(
+      "Seul le propriétaire peut attribuer le rôle administrateur"
+    );
+  }
 
   const invitation = await getInvitationByIdRepository(
     parsed.data.invitationId

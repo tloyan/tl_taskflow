@@ -219,6 +219,9 @@ export default function CreateTaskForm({
           <Field className="gap-1">
             <FieldLabel htmlFor="dueDate">Échéance</FieldLabel>
             <Input id="dueDate" type="date" {...register("dueDate")} />
+            {errors.dueDate && (
+              <FieldError>{errors.dueDate.message}</FieldError>
+            )}
           </Field>
 
           <Button type="submit" disabled={isSubmitting}>

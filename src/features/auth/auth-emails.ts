@@ -3,6 +3,9 @@ import "server-only";
 import { sendEmail } from "@/lib/email";
 
 export async function sendOtpEmail(email: string, otp: string) {
+  if (!/^\d{6}$/.test(otp)) {
+    throw new Error("Invalid OTP format");
+  }
   await sendEmail({
     to: email,
     subject: "Votre code de connexion TaskFlow",

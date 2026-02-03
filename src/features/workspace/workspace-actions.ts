@@ -21,7 +21,38 @@ import type {
   CreateWorkspaceActionResult,
   UpdateWorkspaceActionResult,
   DeleteWorkspaceActionResult,
+  ActionResultError,
 } from "./workspace-types";
+
+function handleError(err: unknown): ActionResultError {
+  if (err instanceof AuthError) {
+    return {
+      error: { code: "AUTHENTICATION_ERROR", message: err.message },
+    };
+  }
+  if (err instanceof WorkspaceValidationError) {
+    return {
+      error: {
+        code: "VALIDATION_ERROR",
+        field: err.field,
+        message: err.message,
+      },
+    };
+  }
+  if (err instanceof WorkspaceNotFoundError) {
+    return {
+      error: { code: "NOT_FOUND", message: err.message },
+    };
+  }
+  if (err instanceof WorkspacePermissionError) {
+    return {
+      error: { code: "PERMISSION_ERROR", message: err.message },
+    };
+  }
+  return {
+    error: { code: "UNKNOWN_ERROR", message: "Une erreur est survenue" },
+  };
+}
 
 export async function createWorkspaceAction(
   data: CreateWorkspaceInput
@@ -31,24 +62,7 @@ export async function createWorkspaceAction(
   try {
     slug = await createWorkspace(data);
   } catch (err) {
-    console.error(err);
-    if (err instanceof AuthError) {
-      return {
-        error: { code: "AUTHENTICATION_ERROR", message: err.message },
-      };
-    }
-    if (err instanceof WorkspaceValidationError) {
-      return {
-        error: {
-          code: "VALIDATION_ERROR",
-          field: err.field,
-          message: err.message,
-        },
-      };
-    }
-    return {
-      error: { code: "UNKNOWN_ERROR", message: "Une erreur est survenue" },
-    };
+    return handleError(err);
   }
 
   revalidatePath("/", "layout");
@@ -63,34 +77,7 @@ export async function updateWorkspaceAction(
   try {
     slug = await updateWorkspace(data);
   } catch (err) {
-    console.error(err);
-    if (err instanceof AuthError) {
-      return {
-        error: { code: "AUTHENTICATION_ERROR", message: err.message },
-      };
-    }
-    if (err instanceof WorkspaceValidationError) {
-      return {
-        error: {
-          code: "VALIDATION_ERROR",
-          field: err.field,
-          message: err.message,
-        },
-      };
-    }
-    if (err instanceof WorkspaceNotFoundError) {
-      return {
-        error: { code: "NOT_FOUND", message: err.message },
-      };
-    }
-    if (err instanceof WorkspacePermissionError) {
-      return {
-        error: { code: "PERMISSION_ERROR", message: err.message },
-      };
-    }
-    return {
-      error: { code: "UNKNOWN_ERROR", message: "Une erreur est survenue" },
-    };
+    return handleError(err);
   }
 
   revalidatePath("/", "layout");
@@ -98,40 +85,12 @@ export async function updateWorkspaceAction(
 }
 
 export async function deleteWorkspaceAction(
-  data: DeleteWorkspaceInput,
-  workspaceName: string
+  data: DeleteWorkspaceInput
 ): Promise<DeleteWorkspaceActionResult> {
   try {
-    await deleteWorkspace(data, workspaceName);
+    await deleteWorkspace(data);
   } catch (err) {
-    console.error(err);
-    if (err instanceof AuthError) {
-      return {
-        error: { code: "AUTHENTICATION_ERROR", message: err.message },
-      };
-    }
-    if (err instanceof WorkspaceValidationError) {
-      return {
-        error: {
-          code: "VALIDATION_ERROR",
-          field: err.field,
-          message: err.message,
-        },
-      };
-    }
-    if (err instanceof WorkspaceNotFoundError) {
-      return {
-        error: { code: "NOT_FOUND", message: err.message },
-      };
-    }
-    if (err instanceof WorkspacePermissionError) {
-      return {
-        error: { code: "PERMISSION_ERROR", message: err.message },
-      };
-    }
-    return {
-      error: { code: "UNKNOWN_ERROR", message: "Une erreur est survenue" },
-    };
+    return handleError(err);
   }
 
   revalidatePath("/", "layout");
@@ -141,6 +100,11 @@ export async function deleteWorkspaceAction(
 export async function checkSlugAvailability(
   slug: string
 ): Promise<{ available: boolean; suggestion: string }> {
+  // Validate slug format
+  if (!slug || slug.length < 3 || !/^[a-z0-9-]+$/.test(slug)) {
+    return { available: false, suggestion: slug };
+  }
+
   const existing = await getWorkspaceBySlugRepository(slug);
 
   if (!existing) {
