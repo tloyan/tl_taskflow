@@ -10,11 +10,47 @@ pnpm build        # Production build
 pnpm lint         # ESLint
 pnpm test         # Vitest (watch mode)
 pnpm test:run     # Vitest (single run)
+pnpm test:unit    # Unit tests only
+pnpm test:integration  # Integration tests only (requires db-test)
+pnpm test:all     # All tests (unit + integration)
 pnpm test:run src/features/workspace/__tests__/workspace-service.test.ts  # Single test file
+pnpm test:e2e         # Playwright E2E tests (headless)
+pnpm test:e2e:headed  # Playwright E2E tests (visible browser)
+pnpm test:e2e:ui      # Playwright UI mode
 pnpm db:generate # Generate migration schema
 pnpm db:migrate # Migrate data
 pnpm db:push # force push database schema
 ```
+
+### Integration Tests
+
+Integration tests run against a real PostgreSQL database. Start the test DB before running:
+
+```bash
+docker compose up db-test -d    # Start test database (port 5433)
+pnpm test:integration           # Run integration tests
+```
+
+- Integration test files use `*.integration.test.ts` naming
+- Factories in `src/test/factories/` insert real data via `testDb`
+- Auth (`@/lib/auth`) and `next/headers` are mocked; everything else uses real DB
+
+### E2E Tests (Playwright)
+
+E2E tests run against a real Next.js dev server and the test database:
+
+```bash
+docker compose up db-test -d    # Start test database (port 5433)
+pnpm test:e2e                   # Run E2E tests (headless)
+pnpm test:e2e:headed            # Run E2E tests (visible browser)
+pnpm test:e2e:ui                # Playwright UI mode
+```
+
+- Test files in `e2e/*.spec.ts`
+- Seed helpers in `e2e/helpers/seed.ts` insert users, sessions, and workspaces directly in the DB
+- Auth strategy: sessions are injected in the DB and the `better-auth.session_token` cookie is set in the browser context (no OTP flow needed)
+- Fixtures in `e2e/fixtures/base.ts` provide `authenticatedPage` and `testUser`
+- The dev server starts on port 3002 with test DB env vars
 
 ## Tech Stack
 
@@ -77,5 +113,7 @@ Server actions catch these errors and return typed error results (never throw to
 - Project documentation and UI text are in **French**
 - Features currently implemented: auth (email OTP), workspaces (CRUD). Members, projects, tasks, comments are planned (see `docs/SPEC.md`)
 - Workspace members table is scaffolded but commented out in schema - future development
-- Tests use `vi.mock()` for dependency isolation with fixture data in `__tests__/` directories
+- Unit tests use `vi.mock()` for dependency isolation with fixture data in `__tests__/` directories
+- Integration tests (`*.integration.test.ts`) test Service + Repository against a real PostgreSQL database
 - Server-only code uses the `"server-only"` import to prevent client bundling
+- E2E tests (`e2e/*.spec.ts`) use Playwright against a real Next.js server and test database
