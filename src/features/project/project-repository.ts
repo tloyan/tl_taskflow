@@ -42,26 +42,45 @@ export async function getProjectsByWorkspaceIdRepository(
 export async function updateProjectRepository(
   id: string,
   data: UpdateProjectData
-): Promise<void> {
-  await db.update(projects).set(data).where(eq(projects.id, id));
+): Promise<{ id: string }> {
+  const [updated] = await db
+    .update(projects)
+    .set(data)
+    .where(eq(projects.id, id))
+    .returning({ id: projects.id });
+  return updated;
 }
 
-export async function deleteProjectRepository(id: string): Promise<void> {
-  await db.delete(projects).where(eq(projects.id, id));
+export async function deleteProjectRepository(
+  id: string
+): Promise<{ id: string }> {
+  const [deleted] = await db
+    .delete(projects)
+    .where(eq(projects.id, id))
+    .returning({ id: projects.id });
+  return deleted;
 }
 
-export async function archiveProjectRepository(id: string): Promise<void> {
-  await db
+export async function archiveProjectRepository(
+  id: string
+): Promise<{ id: string }> {
+  const [archived] = await db
     .update(projects)
     .set({ status: "archived" })
-    .where(eq(projects.id, id));
+    .where(eq(projects.id, id))
+    .returning({ id: projects.id });
+  return archived;
 }
 
-export async function unarchiveProjectRepository(id: string): Promise<void> {
-  await db
+export async function unarchiveProjectRepository(
+  id: string
+): Promise<{ id: string }> {
+  const [unarchived] = await db
     .update(projects)
     .set({ status: "active" })
-    .where(eq(projects.id, id));
+    .where(eq(projects.id, id))
+    .returning({ id: projects.id });
+  return unarchived;
 }
 
 export async function getAllProjectsByUserIdRepository(

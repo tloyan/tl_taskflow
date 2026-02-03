@@ -211,7 +211,7 @@ describe("workspace-service", () => {
         ...validDeleteInput,
         id: "550e8400-e29b-41d4-a716-446655440000",
       };
-      await deleteWorkspace(input, "Test Workspace");
+      await deleteWorkspace(input);
 
       expect(mockRepository.deleteWorkspaceRepository).toHaveBeenCalledWith(
         "550e8400-e29b-41d4-a716-446655440000"
@@ -222,7 +222,7 @@ describe("workspace-service", () => {
       mockAuth.api.getSession.mockResolvedValue(null);
 
       await expect(
-        deleteWorkspace(validDeleteInput, "Test Workspace")
+        deleteWorkspace(validDeleteInput)
       ).rejects.toThrow(AuthError);
     });
 
@@ -231,8 +231,7 @@ describe("workspace-service", () => {
 
       await expect(
         deleteWorkspace(
-          { ...validDeleteInput, id: "invalid" },
-          "Test Workspace"
+          { ...validDeleteInput, id: "invalid" }
         )
       ).rejects.toThrow(WorkspaceValidationError);
     });
@@ -245,7 +244,7 @@ describe("workspace-service", () => {
         ...validDeleteInput,
         id: "550e8400-e29b-41d4-a716-446655440000",
       };
-      await expect(deleteWorkspace(input, "Test Workspace")).rejects.toThrow(
+      await expect(deleteWorkspace(input)).rejects.toThrow(
         WorkspaceNotFoundError
       );
     });
@@ -260,7 +259,7 @@ describe("workspace-service", () => {
         ...validDeleteInput,
         id: "550e8400-e29b-41d4-a716-446655440000",
       };
-      await expect(deleteWorkspace(input, "Test Workspace")).rejects.toThrow(
+      await expect(deleteWorkspace(input)).rejects.toThrow(
         WorkspacePermissionError
       );
     });
@@ -275,7 +274,7 @@ describe("workspace-service", () => {
         id: "550e8400-e29b-41d4-a716-446655440000",
         confirmName: "Wrong Name",
       };
-      await expect(deleteWorkspace(input, "Test Workspace")).rejects.toThrow(
+      await expect(deleteWorkspace(input)).rejects.toThrow(
         WorkspaceValidationError
       );
     });

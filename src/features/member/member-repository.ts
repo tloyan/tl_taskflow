@@ -64,16 +64,23 @@ export async function getMemberRepository(
 
 export async function addMemberRepository(
   data: NewWorkspaceMember
-): Promise<void> {
-  await db.insert(workspaceMembers).values(data);
+): Promise<{ workspaceId: string; userId: string }> {
+  const [created] = await db
+    .insert(workspaceMembers)
+    .values(data)
+    .returning({
+      workspaceId: workspaceMembers.workspaceId,
+      userId: workspaceMembers.userId,
+    });
+  return created;
 }
 
 export async function updateMemberRoleRepository(
   workspaceId: string,
   userId: string,
   role: MemberRole
-): Promise<void> {
-  await db
+): Promise<{ workspaceId: string; userId: string }> {
+  const [updated] = await db
     .update(workspaceMembers)
     .set({ role })
     .where(
@@ -81,21 +88,31 @@ export async function updateMemberRoleRepository(
         eq(workspaceMembers.workspaceId, workspaceId),
         eq(workspaceMembers.userId, userId)
       )
-    );
+    )
+    .returning({
+      workspaceId: workspaceMembers.workspaceId,
+      userId: workspaceMembers.userId,
+    });
+  return updated;
 }
 
 export async function removeMemberRepository(
   workspaceId: string,
   userId: string
-): Promise<void> {
-  await db
+): Promise<{ workspaceId: string; userId: string }> {
+  const [deleted] = await db
     .delete(workspaceMembers)
     .where(
       and(
         eq(workspaceMembers.workspaceId, workspaceId),
         eq(workspaceMembers.userId, userId)
       )
-    );
+    )
+    .returning({
+      workspaceId: workspaceMembers.workspaceId,
+      userId: workspaceMembers.userId,
+    });
+  return deleted;
 }
 
 export async function getMembersCountByWorkspaceIdRepository(

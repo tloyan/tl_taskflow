@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createMockInvitation } from "./invitation.fixtures";
 
-const mockWhere = vi.fn().mockResolvedValue(undefined);
+const mockReturning = vi.fn().mockResolvedValue([{ id: "inv-new" }]);
+const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
 const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
-const mockValues = vi.fn().mockResolvedValue(undefined);
+const mockValues = vi.fn();
 const mockInnerJoinWhere = vi.fn();
 const mockInnerJoin2 = vi.fn().mockReturnValue({ where: mockInnerJoinWhere });
 const mockInnerJoin = vi.fn().mockReturnValue({ where: mockInnerJoinWhere, innerJoin: mockInnerJoin2 });
@@ -67,10 +68,13 @@ describe("invitation-repository", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb.insert.mockReturnValue({ values: mockValues });
-    mockValues.mockResolvedValue(undefined);
+    mockValues.mockReturnValue({
+      returning: vi.fn().mockResolvedValue([{ id: "inv-new" }]),
+    });
     mockDb.update.mockReturnValue({ set: mockSet });
     mockSet.mockReturnValue({ where: mockWhere });
-    mockWhere.mockResolvedValue(undefined);
+    mockReturning.mockResolvedValue([{ id: "inv-new" }]);
+    mockWhere.mockReturnValue({ returning: mockReturning });
     mockInnerJoinWhere.mockResolvedValue([]);
     mockInnerJoin.mockReturnValue({ where: mockInnerJoinWhere, innerJoin: mockInnerJoin2 });
     mockInnerJoin2.mockReturnValue({ where: mockInnerJoinWhere });

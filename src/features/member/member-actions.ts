@@ -40,8 +40,6 @@ import type {
 } from "./member-types";
 
 function handleMemberError(err: unknown): MemberActionResultError {
-  console.error(err);
-
   if (err instanceof AuthError) {
     return {
       error: { code: "AUTHENTICATION_ERROR", message: err.message },

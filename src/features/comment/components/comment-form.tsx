@@ -24,19 +24,21 @@ export default function CommentForm({
     if (!content.trim()) return;
 
     setIsSubmitting(true);
-    const result = await createCommentAction(
-      { taskId, content: content.trim() },
-      pathToRevalidate
-    );
+    try {
+      const result = await createCommentAction(
+        { taskId, content: content.trim() },
+        pathToRevalidate
+      );
 
-    if ("error" in result) {
-      toast.error(result.error.message);
+      if ("error" in result) {
+        toast.error(result.error.message);
+        return;
+      }
+
+      setContent("");
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    setContent("");
-    setIsSubmitting(false);
   };
 
   return (
@@ -51,6 +53,7 @@ export default function CommentForm({
         type="submit"
         size="icon"
         disabled={isSubmitting || !content.trim()}
+        aria-label="Envoyer le commentaire"
       >
         <SendIcon className="size-4" />
       </Button>

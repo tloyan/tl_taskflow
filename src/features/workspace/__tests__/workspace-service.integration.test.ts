@@ -151,8 +151,7 @@ describe("Workspace Service (integration)", () => {
       const workspace = await createTestWorkspace({ ownerId: user.id });
 
       await deleteWorkspace(
-        { id: workspace.id, confirmName: workspace.name },
-        workspace.name
+        { id: workspace.id, confirmName: workspace.name }
       );
 
       const deleted = await testDb.query.workspaces.findFirst({
@@ -176,8 +175,7 @@ describe("Workspace Service (integration)", () => {
 
       await expect(
         deleteWorkspace(
-          { id: workspace.id, confirmName: workspace.name },
-          workspace.name
+          { id: workspace.id, confirmName: workspace.name }
         )
       ).rejects.toThrow(WorkspacePermissionError);
     });

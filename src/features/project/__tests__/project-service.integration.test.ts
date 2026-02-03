@@ -163,8 +163,7 @@ describe("Project Service (integration)", () => {
       });
 
       const workspaceId = await deleteProject(
-        { id: project.id, confirmName: project.name },
-        project.name
+        { id: project.id, confirmName: project.name }
       );
 
       expect(workspaceId).toBe(workspace.id);
@@ -201,8 +200,7 @@ describe("Project Service (integration)", () => {
 
       await expect(
         deleteProject(
-          { id: project.id, confirmName: project.name },
-          project.name
+          { id: project.id, confirmName: project.name }
         )
       ).rejects.toThrow(ProjectPermissionError);
     });

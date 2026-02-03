@@ -1,3 +1,5 @@
+import "server-only";
+
 import { cache } from "react";
 import { getCurrentUser } from "./auth-service";
 import { AuthError } from "./auth-errors";

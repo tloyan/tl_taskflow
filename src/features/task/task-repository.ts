@@ -109,12 +109,23 @@ export async function getTasksByProjectIdRepository(
 export async function updateTaskRepository(
   id: string,
   data: UpdateTaskData
-): Promise<void> {
-  await db.update(tasks).set(data).where(eq(tasks.id, id));
+): Promise<{ id: string }> {
+  const [updated] = await db
+    .update(tasks)
+    .set(data)
+    .where(eq(tasks.id, id))
+    .returning({ id: tasks.id });
+  return updated;
 }
 
-export async function deleteTaskRepository(id: string): Promise<void> {
-  await db.delete(tasks).where(eq(tasks.id, id));
+export async function deleteTaskRepository(
+  id: string
+): Promise<{ id: string }> {
+  const [deleted] = await db
+    .delete(tasks)
+    .where(eq(tasks.id, id))
+    .returning({ id: tasks.id });
+  return deleted;
 }
 
 export async function getMaxPositionByStatusRepository(

@@ -50,6 +50,12 @@ export async function getCommentsByTaskIdRepository(
   return rows as CommentWithAuthor[];
 }
 
-export async function deleteCommentRepository(id: string): Promise<void> {
-  await db.delete(comments).where(eq(comments.id, id));
+export async function deleteCommentRepository(
+  id: string
+): Promise<{ id: string }> {
+  const [deleted] = await db
+    .delete(comments)
+    .where(eq(comments.id, id))
+    .returning({ id: comments.id });
+  return deleted;
 }

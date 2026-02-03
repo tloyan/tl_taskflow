@@ -94,10 +94,7 @@ export async function updateProject(data: unknown): Promise<void> {
   });
 }
 
-export async function deleteProject(
-  data: unknown,
-  projectName: string
-): Promise<string> {
+export async function deleteProject(data: unknown): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) throw new AuthError();
 
@@ -117,7 +114,7 @@ export async function deleteProject(
   if (!member) throw new ProjectPermissionError();
   assertProjectPermission(member.role, ["owner", "admin"]);
 
-  if (parsed.data.confirmName !== projectName) {
+  if (parsed.data.confirmName !== project.name) {
     throw new ProjectValidationError(
       "confirmName",
       "Le nom ne correspond pas"

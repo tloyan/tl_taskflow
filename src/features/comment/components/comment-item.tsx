@@ -41,6 +41,7 @@ export default function CommentItem({
               size="icon"
               className="size-6"
               onClick={() => onDelete(comment.id)}
+              aria-label="Supprimer le commentaire"
             >
               <Trash2Icon className="size-3" />
             </Button>

@@ -224,8 +224,7 @@ describe("workspace-actions", () => {
 
       await expect(
         deleteWorkspaceAction(
-          { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Test" },
-          "Test"
+          { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Test" }
         )
       ).rejects.toThrow("NEXT_REDIRECT:/");
 
@@ -236,8 +235,7 @@ describe("workspace-actions", () => {
       mockService.deleteWorkspace.mockRejectedValue(new AuthError());
 
       const result = await deleteWorkspaceAction(
-        { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Test" },
-        "Test"
+        { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Test" }
       );
 
       expect(result).toEqual({
@@ -251,8 +249,7 @@ describe("workspace-actions", () => {
       );
 
       const result = await deleteWorkspaceAction(
-        { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Wrong" },
-        "Test"
+        { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Wrong" }
       );
 
       expect(result).toEqual({
@@ -270,8 +267,7 @@ describe("workspace-actions", () => {
       );
 
       const result = await deleteWorkspaceAction(
-        { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Test" },
-        "Test"
+        { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Test" }
       );
 
       expect(result).toEqual({
@@ -285,8 +281,7 @@ describe("workspace-actions", () => {
       );
 
       const result = await deleteWorkspaceAction(
-        { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Test" },
-        "Test"
+        { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Test" }
       );
 
       expect(result).toEqual({
@@ -301,8 +296,7 @@ describe("workspace-actions", () => {
       mockService.deleteWorkspace.mockRejectedValue(new Error("DB error"));
 
       const result = await deleteWorkspaceAction(
-        { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Test" },
-        "Test"
+        { id: "550e8400-e29b-41d4-a716-446655440000", confirmName: "Test" }
       );
 
       expect(result).toEqual({

@@ -15,7 +15,6 @@ import type {
 } from "./comment-types";
 
 function handleError(err: unknown): CommentActionResultError {
-  console.error(err);
   if (err instanceof AuthError) {
     return {
       error: { code: "AUTHENTICATION_ERROR", message: err.message },

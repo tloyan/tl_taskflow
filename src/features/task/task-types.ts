@@ -11,8 +11,21 @@ export type TaskWithAssignee = Task & {
   } | null;
 };
 
-export type TaskStatus = "backlog" | "todo" | "in_progress" | "done";
-export type TaskPriority = "low" | "medium" | "high" | "urgent";
+export const TASK_STATUS_VALUES = [
+  "backlog",
+  "todo",
+  "in_progress",
+  "done",
+] as const;
+export type TaskStatus = (typeof TASK_STATUS_VALUES)[number];
+
+export const TASK_PRIORITY_VALUES = [
+  "low",
+  "medium",
+  "high",
+  "urgent",
+] as const;
+export type TaskPriority = (typeof TASK_PRIORITY_VALUES)[number];
 
 export const TASK_STATUSES: { value: TaskStatus; label: string }[] = [
   { value: "backlog", label: "Backlog" },
