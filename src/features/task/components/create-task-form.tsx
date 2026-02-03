@@ -28,6 +28,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 
 type FormValues = z.input<typeof createTaskSchema>;
+type FormOutput = z.output<typeof createTaskSchema>;
 type FormField = keyof FormValues;
 
 type CreateTaskFormProps = {
@@ -54,7 +55,7 @@ export default function CreateTaskForm({
     setError,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({
+  } = useForm<FormValues, unknown, FormOutput>({
     resolver: zodResolver(createTaskSchema),
     mode: "onTouched",
     defaultValues: {
@@ -80,11 +81,10 @@ export default function CreateTaskForm({
     }
   }, [open, defaultStatus, projectId, reset]);
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: FormOutput) => {
     const result = await createTaskAction(
       {
         ...data,
-        assigneeId: data.assigneeId === "unassigned" ? undefined : data.assigneeId || undefined,
         dueDate: data.dueDate ? String(data.dueDate) : undefined,
       },
       pathToRevalidate

@@ -16,14 +16,18 @@ export const createTaskSchema = z.object({
     .optional(),
   status: z.enum(TASK_STATUS_VALUES).default("backlog"),
   priority: z.enum(TASK_PRIORITY_VALUES).default("medium"),
-  assigneeId: z.preprocess(
-    (val) => (val === "unassigned" || val === "" ? undefined : val),
-    z.string().uuid().optional()
-  ),
-  dueDate: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.coerce.date().optional()
-  ),
+  assigneeId: z
+    .string()
+    .optional()
+    .transform((val) => (val === "unassigned" || val === "" ? undefined : val))
+    .pipe(z.string().min(1).optional()),
+  dueDate: z
+    .string()
+    .optional()
+    .transform((val) =>
+      val === "" || val === undefined ? undefined : new Date(val)
+    )
+    .pipe(z.date().optional()),
 });
 
 export const updateTaskSchema = z.object({
@@ -41,14 +45,20 @@ export const updateTaskSchema = z.object({
     .optional(),
   status: z.enum(TASK_STATUS_VALUES).optional(),
   priority: z.enum(TASK_PRIORITY_VALUES).optional(),
-  assigneeId: z.preprocess(
-    (val) => (val === "unassigned" || val === "" ? undefined : val),
-    z.string().uuid().nullable().optional()
-  ),
-  dueDate: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.coerce.date().nullable().optional()
-  ),
+  assigneeId: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) => (val === "unassigned" || val === "" || val == null ? undefined : val))
+    .pipe(z.string().min(1).optional()),
+  dueDate: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) =>
+      val === "" || val == null ? undefined : new Date(val)
+    )
+    .pipe(z.date().optional()),
 });
 
 export const deleteTaskSchema = z.object({
@@ -67,7 +77,7 @@ export const updateTaskPrioritySchema = z.object({
 
 export const updateTaskAssigneeSchema = z.object({
   id: z.string().uuid(),
-  assigneeId: z.string().uuid().nullable(),
+  assigneeId: z.string().min(1).nullable(),
 });
 
 export const updateTaskDueDateSchema = z.object({

@@ -12,6 +12,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 
 type FormValues = z.input<typeof updateTaskSchema>;
+type FormOutput = z.output<typeof updateTaskSchema>;
 type FormField = keyof FormValues;
 
 type EditTaskFormProps = {
@@ -35,7 +36,7 @@ export default function EditTaskForm({
     handleSubmit,
     setError,
     formState: { errors, isSubmitting, isDirty },
-  } = useForm<FormValues>({
+  } = useForm<FormValues, unknown, FormOutput>({
     resolver: zodResolver(updateTaskSchema),
     mode: "onTouched",
     defaultValues: {
@@ -45,7 +46,7 @@ export default function EditTaskForm({
     },
   });
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: FormOutput) => {
     const result = await updateTaskAction(
       {
         id: data.id,
